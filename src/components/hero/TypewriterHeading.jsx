@@ -1,33 +1,28 @@
-import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect, memo } from "react";
+import { profile } from "../../data/profile";
 
-const phrases = [
-  "AHMED RAGAB",
-  "CS & AI STUDENT",
-  "ICPC MENTOR",
-  "FRONTEND DEVELOPER",
-  "COMPETITIVE PROGRAMMER",
-];
+const phrases = profile.heroPhrases;
 
-const TypewriterHeading = React.memo(function TypewriterHeading() {
+/** Typewriter that cycles through the engineering focus phrases. */
+const TypewriterHeading = memo(function TypewriterHeading() {
   const [textIndex, setTextIndex] = useState(0);
   const [charIndex, setCharIndex] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    const currentPhrase = phrases[textIndex];
-    let speed = isDeleting ? 45 : 95;
+    const current = phrases[textIndex];
+    let speed = isDeleting ? 32 : 70;
 
-    if (!isDeleting && charIndex === currentPhrase.length) {
-      speed = 2200;
+    if (!isDeleting && charIndex === current.length) {
+      speed = 2000;
     } else if (isDeleting && charIndex === 0) {
       setIsDeleting(false);
       setTextIndex((prev) => (prev + 1) % phrases.length);
-      speed = 350;
+      speed = 320;
     }
 
     const timer = setTimeout(() => {
-      if (!isDeleting && charIndex === currentPhrase.length) {
+      if (!isDeleting && charIndex === current.length) {
         setIsDeleting(true);
       } else {
         setCharIndex((prev) => prev + (isDeleting ? -1 : 1));
@@ -37,28 +32,11 @@ const TypewriterHeading = React.memo(function TypewriterHeading() {
     return () => clearTimeout(timer);
   }, [charIndex, isDeleting, textIndex]);
 
-  const currentText = phrases[textIndex].substring(0, charIndex);
-  const parts = currentText.split(" ");
-  const firstWord = parts[0] || "";
-  const restWords = parts.slice(1).join(" ");
-
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="relative z-10 mb-12 flex h-[90px] items-center justify-center gap-4 text-[clamp(42px,7vw,90px)] font-extrabold leading-[.95] tracking-[-3px] max-[1040px]:mb-9 max-[680px]:mb-[30px] max-[680px]:h-[70px] max-[680px]:flex-wrap max-[680px]:gap-2 max-[680px]:text-center max-[680px]:text-[clamp(32px,10vw,55px)]"
-    >
-      <span className="text-transparent [-webkit-text-stroke:1.5px_#168b81]">
-        {firstWord}
-      </span>
-      {restWords && (
-        <strong className="font-extrabold text-[#19333a] [-webkit-text-stroke:0]">
-          {restWords}
-        </strong>
-      )}
-      <span className="inline-block w-[4px] h-[0.75em] bg-[#0f766e] animate-pulse rounded-full ml-1" />
-    </motion.div>
+    <span className="font-mono text-sm sm:text-base tracking-wide text-[var(--accent)]">
+      {phrases[textIndex].substring(0, charIndex)}
+      <span className="ml-0.5 inline-block h-[1.05em] w-[2px] translate-y-[2px] animate-pulse bg-[var(--accent)]" />
+    </span>
   );
 });
 

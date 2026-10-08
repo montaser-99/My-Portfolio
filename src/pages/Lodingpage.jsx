@@ -39,7 +39,7 @@ function Lodingpage() {
               opacity: 0.95,
               transition: { duration: 0.85, ease: [0.76, 0, 0.24, 1] },
             }}
-            className="fixed inset-0 z-[9999] flex flex-col items-center justify-between bg-[#0a191c] px-6 py-10 text-[#e7f4f0] selection:bg-[#0f766e]"
+            className="fixed inset-0 z-[9999] flex flex-col items-center justify-between bg-[var(--bg-2)] px-6 py-10 text-[var(--text)] selection:bg-[var(--accent)]/30"
           >
             <LoaderContent progress={progress} />
           </motion.div>

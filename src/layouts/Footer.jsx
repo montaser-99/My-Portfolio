@@ -1,32 +1,48 @@
-import { FaGithub, FaLinkedinIn, FaInstagram } from "react-icons/fa6";
+import { FaGithub, FaLinkedinIn, FaEnvelope } from "react-icons/fa6";
+import { profile } from "../data/profile";
+
+const { links } = profile;
 
 function Footer() {
   const socials = [
-    { label: "GitHub", href: "https://github.com/ahmedragab124", icon: FaGithub },
-    { label: "LinkedIn", href: "https://www.linkedin.com/in/ahmed-ragab-9a6680284", icon: FaLinkedinIn },
-    { label: "Instagram", href: "https://www.instagram.com/_abo__ragab/", icon: FaInstagram },
-  ];
+    { id: "github", href: links.github, icon: FaGithub, label: "GitHub" },
+    { id: "linkedin", href: links.linkedin, icon: FaLinkedinIn, label: "LinkedIn" },
+    {
+      id: "email",
+      href: links.email ? `mailto:${links.email}` : "",
+      icon: FaEnvelope,
+      label: "Email",
+    },
+  ].filter((social) => social.href);
+
+  const year = new Date().getFullYear();
 
   return (
-    <footer className="mx-auto flex w-[calc(100%-56px)] max-w-[1080px] items-center justify-between border-t border-[#d8e6e1] py-7 text-xs text-[#6c817f] max-[850px]:w-[calc(100%-32px)] max-[560px]:flex-col max-[560px]:gap-3">
-      <span>© 2026 Ahmed Ragab • All Rights Reserved</span>
-      
-      <div className="flex items-center gap-4">
-        {socials.map(({ label, href, icon: Icon }) => (
-          <a
-            key={label}
-            href={href}
-            target="_blank"
-            rel="noreferrer"
-            aria-label={label}
-            className="flex h-8 w-8 items-center justify-center rounded-full border border-[#d5eae4] bg-white text-[#0f766e] transition-all hover:scale-110 hover:border-[#0f766e] hover:bg-[#0f766e] hover:text-white"
-          >
-            <Icon className="text-xs" />
-          </a>
-        ))}
-      </div>
+    <footer className="engineering-section engineering-footer mx-auto flex w-[calc(100%-32px)] max-w-[1080px] flex-col items-center justify-between gap-4 border-t border-[var(--border)] py-8 text-[13px] text-[var(--faint)] sm:w-[calc(100%-44px)] sm:flex-row">
+      <span>
+        © {year} {profile.name} · All Rights Reserved
+      </span>
 
-      <span>Designed &amp; Built with React &amp; Tailwind</span>
+      {socials.length > 0 && (
+        <div className="flex items-center gap-3">
+          {socials.map(({ id, href, icon: Icon, label }) => (
+            <a
+              key={id}
+              href={href}
+              target={href.startsWith("http") ? "_blank" : undefined}
+              rel="noreferrer"
+              aria-label={label}
+              className="grid h-9 w-9 place-items-center rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[var(--muted)] transition hover:-translate-y-0.5 hover:border-[var(--accent)]/50 hover:text-[var(--accent)]"
+            >
+              <Icon className="text-sm" />
+            </a>
+          ))}
+        </div>
+      )}
+
+      <span className="font-mono text-[11px]">
+        Software · AI · Embedded · Systems
+      </span>
     </footer>
   );
 }

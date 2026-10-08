@@ -40,7 +40,7 @@ function ScrollToTop() {
           whileHover={{ scale: 1.15, y: -4 }}
           whileTap={{ scale: 0.9 }}
           aria-label="Scroll to top"
-          className="fixed bottom-6 right-6 z-50 grid h-11 w-11 place-items-center rounded-full border border-[#2dd4bf]/40 bg-gradient-to-tr from-[#0f766e] to-[#14b8a6] text-white shadow-xl shadow-[#0f766e]/35 transition-all duration-300 ring-2 ring-white/20 transform-gpu"
+          className="fixed bottom-6 right-6 z-50 grid h-11 w-11 place-items-center rounded-full border border-[var(--accent)]/40 bg-[var(--surface)] text-[var(--accent)] shadow-[0_0_24px_rgba(34,211,238,0.25)] transition-all duration-300 hover:bg-[var(--accent)] hover:text-[#04121a] transform-gpu"
         >
           <FaArrowUp className="text-sm" />
         </motion.button>

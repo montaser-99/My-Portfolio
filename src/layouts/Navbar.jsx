@@ -1,35 +1,39 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaArrowUpRightFromSquare } from "react-icons/fa6";
+import { FaBars, FaXmark } from "react-icons/fa6";
 
 const navLinks = [
+  { name: "Home", href: "#home" },
   { name: "About", href: "#about" },
-  { name: "Skills", href: "#skills" },
-  { name: "Work", href: "#work" },
-  { name: "Services", href: "#services" },
+  { name: "Focus", href: "#focus" },
+  { name: "Projects", href: "#projects" },
   { name: "Experience", href: "#experience" },
   { name: "Contact", href: "#contact" },
 ];
 
 function Navbar() {
   const [isVisible, setIsVisible] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuButtonRef = useRef(null);
 
   useEffect(() => {
-    const handleScroll = () => {
-      const scrollY = window.scrollY;
-
-      if (scrollY > 50) {
-        setIsVisible(true);
-      } else {
-        setIsVisible(false);
-      }
-    };
-
+    const handleScroll = () => setIsVisible(window.scrollY > 40);
     window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
-
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  useEffect(() => {
+    if (!menuOpen) return undefined;
+    const handleMenuKey = (event) => {
+      if (event.key === "Escape") {
+        setMenuOpen(false);
+        menuButtonRef.current?.focus();
+      }
+    };
+    document.addEventListener("keydown", handleMenuKey);
+    return () => document.removeEventListener("keydown", handleMenuKey);
+  }, [menuOpen]);
 
   return (
     <AnimatePresence>
@@ -39,36 +43,77 @@ function Navbar() {
           initial={{ y: -80, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -80, opacity: 0 }}
-          transition={{ type: "spring", stiffness: 260, damping: 22 }}
-          className="fixed top-4 left-0 right-0 z-50 mx-auto flex h-[62px] w-[calc(100%-40px)] max-w-[1080px] items-center justify-between rounded-2xl border border-[#d6e8e0] bg-[#eff8f4]/95 px-4 text-xs text-[#1d383d] shadow-md md:backdrop-blur-xl transform-gpu max-[560px]:top-3 max-[560px]:w-[calc(100%-24px)]"
+          transition={{ type: "spring", stiffness: 260, damping: 24 }}
+          className="fixed top-4 left-0 right-0 z-50 mx-auto flex h-[60px] w-[calc(100%-24px)] max-w-[1080px] items-center justify-between rounded-xl border border-[var(--border)] bg-[#0a1017]/85 px-4 backdrop-blur-gpu sm:w-[calc(100%-40px)]"
         >
-          <div className="flex items-center gap-2 rounded-full border border-[#d2e9e1] bg-[#f7fbf8]/90 px-3.5 py-1.5 text-[#264a47] shadow-sm transition duration-200 hover:bg-white">
-            <span className="h-2 w-2 rounded-full bg-[#10b981] animate-pulse" />
-            <span className="font-semibold">Available for Hiring</span>
-          </div>
+          <a href="#home" className="flex items-center gap-2">
+            <span className="grid h-8 w-8 place-items-center rounded-lg border border-[var(--accent)]/40 bg-[var(--accent)]/10 font-mono text-xs font-bold text-[var(--accent)]">
+              MM
+            </span>
+            <span className="hidden text-sm font-semibold tracking-wide text-[var(--text)] sm:block">
+              Mahmoud Montaser
+            </span>
+          </a>
 
           <nav
-            className="ml-6 flex items-center gap-6 text-[#526b71] max-[850px]:ml-2 max-[850px]:gap-3 max-[680px]:hidden"
+            className="hidden items-center gap-6 text-[13px] text-[var(--muted)] md:flex"
             aria-label="Primary navigation"
           >
             {navLinks.map((link) => (
               <a
                 key={link.name}
-                className="transition-all duration-200 hover:-translate-y-0.5 hover:text-[#0f766e] hover:font-semibold"
                 href={link.href}
+                className="transition-colors hover:text-[var(--accent)]"
               >
                 {link.name}
               </a>
             ))}
           </nav>
 
-          <a
-            className="group inline-flex items-center gap-2 rounded-full bg-[#0f766e] px-4 py-2 font-bold !text-white shadow-md shadow-[#0f766e]/20 transition duration-200 hover:-translate-y-0.5 hover:bg-[#0b625c]"
-            href="#contact"
-          >
-            Hire Me{" "}
-            <FaArrowUpRightFromSquare className="transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-          </a>
+          <div className="flex items-center gap-2">
+            <a
+              href="#contact"
+              className="hidden rounded-lg border border-[var(--accent)]/50 bg-[var(--accent)]/10 px-4 py-2 text-[13px] font-semibold text-[var(--accent)] transition hover:bg-[var(--accent)]/20 sm:inline-flex"
+            >
+              Get in touch
+            </a>
+            <button
+              type="button"
+              onClick={() => setMenuOpen((v) => !v)}
+              aria-label={menuOpen ? "Close menu" : "Open menu"}
+              aria-expanded={menuOpen}
+              aria-controls="mobile-navigation"
+              ref={menuButtonRef}
+              className="grid h-11 w-11 place-items-center rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] md:hidden"
+            >
+              {menuOpen ? <FaXmark /> : <FaBars />}
+            </button>
+          </div>
+
+          <AnimatePresence>
+            {menuOpen && (
+              <motion.nav
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.18 }}
+                className="absolute left-0 right-0 top-[68px] mx-auto flex w-[calc(100%-24px)] max-w-[1080px] flex-col gap-1 rounded-xl border border-[var(--border)] bg-[#0a1017]/97 p-2 backdrop-blur-gpu sm:w-[calc(100%-40px)] md:hidden"
+                aria-label="Mobile navigation"
+                id="mobile-navigation"
+              >
+                {navLinks.map((link) => (
+                  <a
+                    key={link.name}
+                    href={link.href}
+                    onClick={() => setMenuOpen(false)}
+                    className="min-h-11 rounded-lg px-3 py-3 text-sm text-[var(--muted)] transition hover:bg-[var(--surface-2)] hover:text-[var(--accent)]"
+                  >
+                    {link.name}
+                  </a>
+                ))}
+              </motion.nav>
+            )}
+          </AnimatePresence>
         </motion.header>
       )}
     </AnimatePresence>

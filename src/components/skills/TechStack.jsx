@@ -1,35 +1,25 @@
-import { motion } from "framer-motion";
-import { skillCategories } from "../../data/skillsData";
+import SectionHeading from "../common/SectionHeading";
 import SkillCategoryCard from "./SkillCategoryCard";
+import { skillGroups } from "../../data/skills";
 
 function TechStack() {
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 35 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-80px" }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
-      className="mx-auto my-20 w-[calc(100%-32px)] sm:w-[calc(100%-44px)] max-w-[1080px]"
+    <section
       id="skills"
+      className="engineering-section engineering-skills relative mx-auto w-[calc(100%-32px)] max-w-[1080px] py-20 sm:w-[calc(100%-44px)] sm:py-28"
     >
-      <div className="mb-10 text-left">
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-[#d2e9e1] bg-[#edf7f3] px-3.5 py-1 text-[10px] font-bold tracking-[.6px] text-[#0f766e] uppercase">
-          JOB MARKET SKILLS MATRIX
-        </span>
-        <h2 className="mt-3 text-3xl font-black tracking-tight text-[#19333a] sm:text-4xl">
-          Technical Stack &amp; Core Competencies
-        </h2>
-        <p className="mt-2.5 max-w-xl text-xs sm:text-[13px] leading-relaxed text-[#526b71]">
-          A comprehensive breakdown of technical proficiencies, engineering fundamentals, and certified professional skills for hiring managers and technical teams.
-        </p>
-      </div>
+      <SectionHeading
+        eyebrow="Skills"
+        title="Technical toolkit"
+        description="Grouped by engineering area — the tools I actually reach for across AI, software, and embedded work."
+      />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {skillCategories.map((cat, idx) => (
-          <SkillCategoryCard key={cat.title} cat={cat} idx={idx} />
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {skillGroups.map((group, index) => (
+          <SkillCategoryCard key={group.title} group={group} index={index} />
         ))}
       </div>
-    </motion.section>
+    </section>
   );
 }
 

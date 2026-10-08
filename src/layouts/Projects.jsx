@@ -1,127 +1,62 @@
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import ProjectHeader from "../components/projects/ProjectHeader";
-import ProjectTrack from "../components/projects/ProjectTrack";
-import ProjectPagination from "../components/projects/ProjectPagination";
-import { projectsData as fallbackProjects } from "../data/projectData";
-import { getProjects } from "../lib/supabaseClient";
+import { useMemo, useState } from "react";
+import { AnimatePresence } from "framer-motion";
+import SectionHeading from "../components/common/SectionHeading";
+import ProjectCard from "../components/projects/ProjectCard";
+import ProjectFilters from "../components/projects/ProjectFilters";
+import ProjectsEmpty from "../components/projects/ProjectsEmpty";
+import { projects, activeProjectCategories } from "../data/projects";
 
 function Projects() {
-  const [projectsList, setProjectsList] = useState(fallbackProjects);
-  const numProjects = projectsList.length || 1;
-  const [virtualIndex, setVirtualIndex] = useState(numProjects * 2);
-  const [enableTransition, setEnableTransition] = useState(true);
-  const [isPaused, setIsPaused] = useState(false);
-  const [windowWidth, setWindowWidth] = useState(
-    typeof window !== "undefined" ? window.innerWidth : 1200
+  const [active, setActive] = useState("All");
+
+  const visible = useMemo(
+    () =>
+      active === "All"
+        ? projects
+        : projects.filter((project) => project.category === active),
+    [active]
   );
 
-  useEffect(() => {
-    async function loadProjects() {
-      try {
-        const data = await getProjects();
-        if (data && data.length > 0) {
-          setProjectsList(data);
-          setVirtualIndex(data.length * 2);
-        }
-      } catch (err) {
-        console.error("Error loading projects:", err);
-      }
-    }
-    loadProjects();
-  }, []);
-
-  const activeIndex = ((virtualIndex % numProjects) + numProjects) % numProjects;
-
-  useEffect(() => {
-    const handleResize = () => setWindowWidth(window.innerWidth);
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  // Continuous Autoplay
-  useEffect(() => {
-    if (isPaused || numProjects <= 1) return;
-    const interval = setInterval(() => {
-      setEnableTransition(true);
-      setVirtualIndex((prev) => prev + 1);
-    }, 3800);
-    return () => clearInterval(interval);
-  }, [isPaused, numProjects]);
-
-  // Seamless Infinite Loop Reset across 5 cloned sets
-  useEffect(() => {
-    if (virtualIndex >= numProjects * 3.5 || virtualIndex <= numProjects * 0.5) {
-      const timer = setTimeout(() => {
-        setEnableTransition(false);
-        setVirtualIndex(numProjects * 2 + activeIndex);
-      }, 650);
-      return () => clearTimeout(timer);
-    }
-  }, [virtualIndex, numProjects, activeIndex]);
-
-  const isMobile = windowWidth < 640;
-  const cardWidth = isMobile ? Math.min(windowWidth - 56, 300) : 340;
-  const cardGap = isMobile ? 12 : 20;
-  const step = cardWidth + cardGap;
-  const containerWidth = isMobile ? windowWidth - 32 : Math.min(windowWidth - 44, 1080);
-  const centerOffset = (containerWidth - cardWidth) / 2;
-  const trackX = -(virtualIndex * step) + centerOffset;
-
-  const circularProjects = [
-    ...projectsList,
-    ...projectsList,
-    ...projectsList,
-    ...projectsList,
-    ...projectsList,
-  ];
+  const isEmpty = projects.length === 0;
 
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-80px" }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
-      className="mx-auto my-16 w-[calc(100%-32px)] sm:w-[calc(100%-44px)] max-w-[1080px] overflow-hidden"
-      id="work"
+    <section
+      id="projects"
+      className="engineering-section engineering-projects relative mx-auto w-[calc(100%-32px)] max-w-[1080px] py-20 sm:w-[calc(100%-44px)] sm:py-28"
     >
-      <ProjectHeader
-        activeIndex={activeIndex}
-        totalProjects={numProjects}
-        onPrev={() => {
-          setEnableTransition(true);
-          setVirtualIndex((prev) => prev - 1);
-        }}
-        onNext={() => {
-          setEnableTransition(true);
-          setVirtualIndex((prev) => prev + 1);
-        }}
+      <SectionHeading
+        eyebrow="Selected Work"
+        title="Ideas across one connected system"
+        description="One gallery across every engineering area. Filter by primary category — specialisations and tools are shown as tags on each card."
       />
 
-      <ProjectTrack
-        circularProjects={circularProjects}
-        trackX={trackX}
-        cardGap={cardGap}
-        cardWidth={cardWidth}
-        virtualIndex={virtualIndex}
-        enableTransition={enableTransition}
-        onHoverStart={() => setIsPaused(true)}
-        onHoverEnd={() => setIsPaused(false)}
-        onCardClick={(targetIdx) => {
-          setEnableTransition(true);
-          setVirtualIndex(targetIdx);
-        }}
-      />
-
-      <ProjectPagination
-        projects={projectsList}
-        activeIndex={activeIndex}
-        onSelect={(targetIdx) => {
-          setEnableTransition(true);
-          setVirtualIndex((prev) => prev + (targetIdx - activeIndex));
-        }}
-      />
-    </motion.section>
+      {isEmpty ? (
+        <ProjectsEmpty />
+      ) : (
+        <>
+          <ProjectFilters
+            categories={activeProjectCategories}
+            active={active}
+            onChange={setActive}
+          />
+          {visible.length > 0 ? (
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              <AnimatePresence mode="popLayout">
+                {visible.map((project, index) => (
+                  <ProjectCard
+                    key={project.id}
+                    project={project}
+                    index={index}
+                  />
+                ))}
+              </AnimatePresence>
+            </div>
+          ) : (
+            <ProjectsEmpty filtered />
+          )}
+        </>
+      )}
+    </section>
   );
 }
 

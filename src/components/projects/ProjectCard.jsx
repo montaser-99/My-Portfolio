@@ -1,161 +1,152 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { FaArrowUpRightFromSquare, FaCode, FaStar, FaImage } from "react-icons/fa6";
+import {
+  FaArrowUpRightFromSquare,
+  FaGithub,
+  FaMicrochip,
+} from "react-icons/fa6";
+import ProjectDetails from "./ProjectDetails";
 
-function ProjectCard({ project, isActive, indexOffset = 0, cardWidth = 340, onClick }) {
-  const [imgError, setImgError] = useState(false);
+function ProjectCard({ project, index }) {
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const detailsTriggerRef = useRef(null);
+  const tags = project.tags ?? [];
+  const technologies = project.technologies ?? [];
 
-  const safeTags = Array.isArray(project?.tags)
-    ? project.tags
-    : typeof project?.tags === "string"
-    ? project.tags.split(",").map((t) => t.trim()).filter(Boolean)
-    : [];
-
-  const demoUrl = project?.demoUrl || project?.demo_url || "#";
-  const githubUrl = project?.githubUrl || project?.github_url || "#";
-
-  const dist = indexOffset;
-  const absDist = Math.abs(dist);
-
-  let rotateY = 0;
-  let scale = 1;
-  let opacity = 1;
-  let zIndex = 30;
-  let y = -8;
-
-  if (dist === 0) {
-    rotateY = 0;
-    scale = 1;
-    opacity = 1;
-    zIndex = 30;
-    y = -10;
-  } else {
-    rotateY = dist > 0 ? -22 : 22;
-    if (absDist >= 2) rotateY = dist > 0 ? -36 : 36;
-    scale = Math.max(0.72, 1 - absDist * 0.12);
-    opacity = Math.max(0.35, 1 - absDist * 0.28);
-    zIndex = Math.max(1, 30 - absDist * 10);
-    y = absDist * 6;
+  function closeDetails() {
+    setDetailsOpen(false);
+    requestAnimationFrame(() => detailsTriggerRef.current?.focus());
   }
 
   return (
-    <motion.div
-      onClick={onClick}
-      style={{
-        width: `${cardWidth}px`,
-        zIndex,
-        transformStyle: "preserve-3d",
-      }}
-      animate={{
-        scale,
-        opacity,
-        rotateY,
-        y,
-      }}
-      transition={{
-        type: "spring",
-        stiffness: 220,
-        damping: 24,
-      }}
-      className={`flex flex-col justify-between shrink-0 rounded-2xl border bg-white overflow-hidden cursor-pointer transition-[border-color,box-shadow,opacity] duration-300 ${
-        isActive
-          ? "border-[#0f766e] shadow-[0_20px_45px_rgba(15,118,110,0.22)] ring-2 ring-[#0f766e]/20"
-          : "border-[#dce9e4] shadow-sm hover:border-[#9acfc2] hover:opacity-90"
-      }`}
+    <motion.article
+      layout
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.97 }}
+      transition={{ duration: 0.35, delay: index * 0.05 }}
+      className="card-surface group flex min-w-0 flex-col overflow-hidden rounded-2xl transition-transform duration-300 hover:-translate-y-1"
     >
-      {/* Card Image Header */}
-      <div className="relative h-44 sm:h-48 w-full overflow-hidden bg-[#eaf4f1]">
-        {project?.image && !imgError ? (
+      <div className="relative h-44 w-full overflow-hidden border-b border-[var(--border)] bg-[var(--bg-2)]">
+        {project.image ? (
           <img
             src={project.image}
-            alt={project.title}
-            className="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
-            onError={() => setImgError(true)}
+            alt={`${project.title} cover`}
+            loading="lazy"
+            className="h-full w-full object-cover opacity-90 transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
-          /* Fallback placeholder */
-          <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-gradient-to-br from-[#edf7f3] to-[#d5eae4]">
-            <FaImage className="text-3xl text-[#0f766e]/40" />
-            <span className="px-4 text-center text-[11px] font-semibold text-[#0f766e]/60 leading-snug">
-              {project?.title || "Project"}
-            </span>
+          <div
+            className={`project-art project-art-${project.category.toLowerCase()} flex h-full w-full items-center justify-center`}
+            aria-label={`${project.category} project visual`}
+          >
+            <svg
+              viewBox="0 0 420 180"
+              className="h-full w-full"
+              aria-hidden="true"
+            >
+              <path d="M0 135h90l28-28h64l28-28h58l26-26h126M34 0v52l32 32v40l32 32M280 180v-38l28-28h56l24-24" />
+              <path d="M0 32h80l24 24h64M176 180v-28l26-26h42M420 140h-70l-22-22v-35" />
+              <circle cx="210" cy="79" r="24" />
+              <circle cx="210" cy="79" r="5" />
+              <circle cx="118" cy="107" r="4" />
+              <circle cx="294" cy="53" r="4" />
+              <circle cx="372" cy="114" r="4" />
+            </svg>
+            <FaMicrochip
+              aria-hidden="true"
+              className="absolute text-3xl text-[var(--accent)]/65"
+            />
           </div>
         )}
 
-        {/* Number Badge */}
-        <span className="absolute top-3 left-3 flex h-6 w-6 items-center justify-center rounded-full bg-white/95 text-[10px] font-bold text-[#19333a] shadow-sm">
-          {project?.id || "01"}
+        <span className="absolute left-3 top-3 rounded-md border border-[var(--accent)]/40 bg-[#04121a]/85 px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--accent)] backdrop-blur-gpu">
+          {project.category}
         </span>
-
-        {/* Category Badge */}
-        <span className="absolute top-3 left-11 rounded-full bg-white/95 px-3 py-1 text-[9px] font-bold tracking-wider text-[#0f766e] shadow-sm uppercase">
-          {project?.category || "PORTFOLIO"}
-        </span>
-
-        {/* Star Badge */}
-        {isActive && (
-          <span className="absolute top-3 right-3 flex h-7 w-7 items-center justify-center rounded-full bg-[#0f766e] text-white shadow-md">
-            <FaStar className="text-xs" />
+        {project.temporary && (
+          <span className="absolute right-3 top-3 rounded-md border border-amber-200/35 bg-[#17150f]/90 px-2.5 py-1 font-mono text-[10px] font-semibold text-amber-100">
+            CONCEPT
           </span>
         )}
       </div>
 
-      {/* Card Content Body */}
-      <div className="flex flex-1 flex-col justify-between p-5 sm:p-6">
-        <div>
-          <h3 className="text-lg sm:text-xl font-bold text-[#19333a]">
-            {project?.title}
-          </h3>
-          <p className="mt-2 text-xs leading-relaxed text-[#526b71] line-clamp-3">
-            {project?.description}
+      <div className="flex min-w-0 flex-1 flex-col p-5 sm:p-6">
+        <h3 className="text-lg font-bold text-white">{project.title}</h3>
+        {project.temporary && (
+          <p className="mt-1 font-mono text-[10px] tracking-wide text-amber-100/70">
+            Temporary visual concept · not completed work
           </p>
+        )}
+        <p className="mt-2 text-[13px] leading-relaxed text-[var(--muted)]">
+          {project.description}
+        </p>
 
-          {/* Tag Pills */}
+        {tags.length > 0 && (
           <div className="mt-4 flex flex-wrap gap-1.5">
-            {safeTags.map((tag) => (
+            {tags.map((tag) => (
               <span
                 key={tag}
-                className={`rounded-md px-2.5 py-1 text-[9.5px] sm:text-[10px] font-semibold ${
-                  isActive
-                    ? "bg-[#edf7f3] text-[#0f766e] border border-[#cbe4dc]"
-                    : "bg-[#f4f8f6] text-[#627a7b] border border-[#e2ece8]"
-                }`}
+                className="rounded-md border border-[var(--border)] bg-[var(--bg-2)] px-2 py-1 text-[11px] font-medium text-[var(--muted)]"
               >
                 {tag}
               </span>
             ))}
           </div>
-        </div>
+        )}
 
-        {/* Card Action Buttons */}
-        <div className="mt-6 border-t border-[#eaf2ef] pt-4 flex items-center justify-between">
-          {isActive ? (
-            <div className="flex w-full items-center justify-between gap-2.5">
+        {technologies.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-x-2 gap-y-1 font-mono text-[11px] text-[var(--faint)]">
+            {technologies.map((technology, technologyIndex) => (
+              <span key={technology}>
+                {technology}
+                {technologyIndex < technologies.length - 1 && (
+                  <span className="ml-2 text-[var(--border)]">·</span>
+                )}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {(project.github || project.demo) && (
+          <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-[var(--border-soft)] pt-4">
+            {project.demo && (
               <a
-                href={demoUrl}
+                href={project.demo}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-1.5 sm:gap-2 rounded-full bg-[#0f766e] px-3.5 sm:px-4.5 py-2 text-[11px] sm:text-xs font-semibold text-white shadow-md shadow-[#0f766e]/20 transition hover:-translate-y-0.5 hover:bg-[#0b625c]"
+                className="inline-flex min-h-11 items-center gap-1.5 rounded-lg bg-[var(--accent)] px-3.5 py-2 text-xs font-semibold text-[#04121a] transition hover:bg-[#5ee0f5]"
               >
-                Live Demo <FaArrowUpRightFromSquare className="text-[10px]" />
+                Live Demo <FaArrowUpRightFromSquare aria-hidden="true" />
               </a>
+            )}
+            {project.github && (
               <a
-                href={githubUrl}
+                href={project.github}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-semibold text-[#2c4a4d] transition hover:text-[#0f766e]"
+                className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-[var(--border)] px-3.5 py-2 text-xs font-semibold text-[var(--muted)] transition hover:border-[var(--accent)]/50 hover:text-[var(--accent)]"
               >
-                <FaCode className="text-xs" /> Source Code
+                <FaGithub aria-hidden="true" className="text-sm" /> Source
               </a>
-            </div>
-          ) : (
-            <span className="inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-semibold text-[#0f766e] transition hover:underline">
-              Click to inspect <FaArrowUpRightFromSquare className="text-[10px]" />
-            </span>
-          )}
-        </div>
+            )}
+          </div>
+        )}
+
+        <button
+          ref={detailsTriggerRef}
+          type="button"
+          onClick={() => setDetailsOpen(true)}
+          className="mt-5 min-h-11 self-start border-b border-cyan-100/35 pb-1 text-sm font-medium text-cyan-100/85 transition hover:border-cyan-100 hover:text-white"
+        >
+          {project.temporary ? "Explore concept" : "View project details"}
+          <span aria-hidden="true"> ↗</span>
+        </button>
       </div>
-    </motion.div>
+
+      {detailsOpen && (
+        <ProjectDetails project={project} onClose={closeDetails} />
+      )}
+    </motion.article>
   );
 }
 
